@@ -3,8 +3,8 @@
  * @param {any} target
  * @returns
  */
-var newCopyObjectDeep = function (target) {
-  var result;
+const deepCopyAny = function (target) {
+  let result;
 
   // target이 Date 객체일 경우
   if (target instanceof Date) {
@@ -12,23 +12,27 @@ var newCopyObjectDeep = function (target) {
   }
   // target이 배열일 경우
   else if (Array.isArray(target)) {
-    result = target.map(newCopyObjectDeep);
-  }
-  // target이 함수일 경우
-  else if (typeof target === "function") {
-    result = function () {
-      return target.apply(this, arguments); // 함수 복사하기
-    };
+    result = target.map(deepCopyAny);
   }
   // target이 정규 표현식일 경우
   else if (target instanceof RegExp) {
     result = new RegExp(target);
   }
+  // target이 Map일 경우
+  else if (target instanceof Map) {
+    result = new Map(
+      Array.from(target, ([key, value]) => [key, deepCopyAny(value)])
+    );
+  }
+  // target이 Set일 경우
+  else if (target instanceof Set) {
+    result = new Set(Array.from(target, (value) => deepCopyAny(value)));
+  }
   // target이 null이 아닌 객체일 경우
   else if (typeof target === "object" && target !== null) {
     result = {};
-    for (var prop in target) {
-      result[prop] = newCopyObjectDeep(target[prop]);
+    for (let prop in target) {
+      result[prop] = deepCopyAny(target[prop]);
     }
   }
   // target이 원시 타입이나 그 외의 타입일 경우
@@ -40,51 +44,51 @@ var newCopyObjectDeep = function (target) {
 
 console.log("--------------------------");
 // 숫자 복사 테스트
-var num = 42;
-var copiedNum = newCopyObjectDeep(num);
+let num = 42;
+let copiedNum = deepCopyAny(num);
 console.log("------숫자 복사 테스트---------");
 console.log(copiedNum === num); // true
 
 // 문자열 복사 테스트
-var str = "Hello, world!";
-var copiedStr = newCopyObjectDeep(str);
+let str = "Hello, world!";
+let copiedStr = deepCopyAny(str);
 console.log("------문자열 복사 테스트---------");
 console.log(copiedStr === str); // true
 
 // 배열 복사 테스트
-var arr = [1, 2, { a: 3, b: 4 }, [5, 6]];
-var copiedArr = newCopyObjectDeep(arr);
+let arr = [1, 2, { a: 3, b: 4 }, [5, 6]];
+let copiedArr = deepCopyAny(arr);
 console.log("------배열 복사 테스트---------");
 console.log(copiedArr !== arr); // true
 console.log(copiedArr[2] !== arr[2]); // true
 console.log(copiedArr[3] !== arr[3]); // true
 
 // Date 객체 복사 테스트
-var date = new Date();
-var copiedDate = newCopyObjectDeep(date);
+let date = new Date();
+let copiedDate = deepCopyAny(date);
 console.log("------Date 복사 테스트---------");
 console.log(copiedDate !== date); // true
 console.log(copiedDate.getTime() === date.getTime()); // true
 
 // 함수 복사 테스트
-var func = function () {
+let func = function () {
   console.log("함수 테스트");
 };
-var copiedFunc = newCopyObjectDeep(func);
+let copiedFunc = deepCopyAny(func);
 console.log("------함수 복사 테스트---------");
 console.log(copiedFunc !== func); // true
 copiedFunc(); // "함수 테스트"
 
 // 정규표현식 복사 테스트
-var regex = /test/gi;
-var copiedRegex = newCopyObjectDeep(regex);
+let regex = /test/gi;
+let copiedRegex = deepCopyAny(regex);
 console.log("------정규표현식 복사 테스트---------");
 console.log(copiedRegex !== regex); // true
 console.log(copiedRegex.source === regex.source); // true
 console.log(copiedRegex.flags === regex.flags); // true
 
 // 객체 복사 테스트
-var obj = {
+let obj = {
   a: 1,
   b: { c: null, d: [1, 2] },
   test: new Date(),
@@ -93,7 +97,7 @@ var obj = {
   },
   regex: /test/gi,
 };
-var copiedObj = newCopyObjectDeep(obj);
+let copiedObj = deepCopyAny(obj);
 console.log("------객체 복사 테스트---------");
 console.log(copiedObj !== obj); // true
 console.log(copiedObj.b !== obj.b); // true
